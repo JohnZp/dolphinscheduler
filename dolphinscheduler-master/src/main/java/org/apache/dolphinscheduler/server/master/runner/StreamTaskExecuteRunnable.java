@@ -89,8 +89,6 @@ public class StreamTaskExecuteRunnable implements Runnable {
 
     protected ProcessTaskRelationMapper processTaskRelationMapper;
 
-    protected TaskPluginManager taskPluginManager;
-
     private StreamTaskInstanceExecCacheManager streamTaskInstanceExecCacheManager;
 
     protected TaskDefinition taskDefinition;
@@ -115,7 +113,6 @@ public class StreamTaskExecuteRunnable implements Runnable {
         this.processService = SpringApplicationContext.getBean(ProcessService.class);
         this.masterConfig = SpringApplicationContext.getBean(MasterConfig.class);
         this.workerTaskDispatcher = SpringApplicationContext.getBean(WorkerTaskDispatcher.class);
-        this.taskPluginManager = SpringApplicationContext.getBean(TaskPluginManager.class);
         this.processTaskRelationMapper = SpringApplicationContext.getBean(ProcessTaskRelationMapper.class);
         this.taskInstanceDao = SpringApplicationContext.getBean(TaskInstanceDao.class);
         this.streamTaskInstanceExecCacheManager =
@@ -123,6 +120,8 @@ public class StreamTaskExecuteRunnable implements Runnable {
         this.taskDefinition = taskDefinition;
         this.taskExecuteStartMessage = taskExecuteStartMessage;
         this.taskExecutionContextFactory = SpringApplicationContext.getBean(TaskExecutionContextFactory.class);
+        this.defaultTaskExecuteRunnableFactory =
+                SpringApplicationContext.getBean(DefaultTaskExecuteRunnableFactory.class);
     }
 
     public TaskInstance getTaskInstance() {
@@ -312,10 +311,10 @@ public class StreamTaskExecuteRunnable implements Runnable {
             return null;
         }
 
-        TaskChannel taskChannel = taskPluginManager.getTaskChannel(taskInstance.getTaskType());
+        TaskChannel taskChannel = TaskPluginManager.getTaskChannel(taskInstance.getTaskType());
         ResourceParametersHelper resources = taskChannel.getResources(taskInstance.getTaskParams());
 
-        AbstractParameters baseParam = taskPluginManager.getParameters(
+        AbstractParameters baseParam = TaskPluginManager.getParameters(
                 ParametersNode.builder()
                         .taskType(taskInstance.getTaskType())
                         .taskParams(taskInstance.getTaskParams())
